@@ -6,8 +6,18 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-ssm = boto3.client("ssm", region_name=os.getenv("AWS_REGION", "us-west-1"))
-sqs = boto3.client("sqs", region_name=os.getenv("AWS_REGION", "us-west-1"))
+AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
+AWS_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
+
+boto3_client_params = {
+    'region_name': AWS_REGION
+}
+
+if AWS_ENDPOINT_URL:
+    boto3_client_params['endpoint_url'] = AWS_ENDPOINT_URL
+
+ssm = boto3.client("ssm", **boto3_client_params)
+sqs = boto3.client("sqs", **boto3_client_params)
 
 # Load token from SSM once on startup
 AUTH_TOKEN = ssm.get_parameter(Name="/microservice1/token", WithDecryption=True)["Parameter"]["Value"]

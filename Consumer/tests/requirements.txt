@@ -1,3 +1,0 @@
-moto
-Flask
-Werkzeug
