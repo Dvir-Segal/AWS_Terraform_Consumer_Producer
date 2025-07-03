@@ -38,8 +38,14 @@ jobs:
           sed -i "s|\(image = \\\".*/microservice2:\).*\\\"|\1${SHORT_SHA}\\\"|" main.tf
 
 
-      - name: Terraform Init
-        run: terraform init
+      - name: Terraform Init with backend config
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET_NAME }}" \
+            -backend-config="key=terraform.tfstate" \
+            -backend-config="region=us-west-1" \
+            -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE_NAME }}" \
+            -backend-config="encrypt=true"
 
       - name: Terraform Plan
         run: terraform plan
