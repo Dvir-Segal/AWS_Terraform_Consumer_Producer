@@ -38,8 +38,8 @@ jobs:
           sed -i "s|\(image = \\\".*/microservice2:\).*\\\"|\1${SHORT_SHA}\\\"|" main.tf
 
 
-      # - name: Terraform Init
-      #   run: terraform init
+      - name: Terraform Init
+        run: terraform init
 
       # - name: Terraform Plan
       #   run: terraform plan
