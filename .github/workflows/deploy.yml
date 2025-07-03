@@ -12,6 +12,7 @@ env:
   TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
   TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   TF_VAR_producer_token: ${{ secrets.TOKEN }}
+  TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
 
 jobs:
   deploy:
