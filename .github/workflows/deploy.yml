@@ -31,10 +31,11 @@ jobs:
       - name: Extract Short SHA
         run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-      - name: Replace Docker image tags in Terraform
+      - name: Update image tags in Terraform
         run: |
-          sed -i "s|\(image = \\".*/microservice1:\).*\\(\\".*\)|\1${SHORT_SHA}\2|" main.tf
-          sed -i "s|\(image = \\".*/microservice2:\).*\\(\\".*\)|\1${SHORT_SHA}\2|" main.tf
+          sed -i "s|\(image = \\\".*/microservice1:\).*\\\"|\1${SHORT_SHA}\\\"|" main.tf
+          sed -i "s|\(image = \\\".*/microservice2:\).*\\\"|\1${SHORT_SHA}\\\"|" main.tf
+
 
       - name: Terraform Init
         run: terraform init
