@@ -194,7 +194,7 @@ resource "aws_ecs_task_definition" "microservice1" {
 
   container_definitions = jsonencode([{
     name  = "microservice1"
-    image = "dvirdock/microservice1:v2"
+    image = "dvirdock/microservice1:placeholder"
     portMappings = [{
       containerPort = 80
       hostPort      = 80
@@ -251,7 +251,7 @@ resource "aws_ecs_task_definition" "microservice2" {
 
   container_definitions = jsonencode([{
     name  = "microservice2"
-    image = "dvirdock/microservice2:v2"
+    image = "dvirdock/microservice2:placeholder"
     environment = [
       {
         name  = "SQS_QUEUE_URL"
