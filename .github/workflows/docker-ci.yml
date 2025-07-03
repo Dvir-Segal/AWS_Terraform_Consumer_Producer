@@ -40,7 +40,7 @@ jobs:
           AWS_DEFAULT_REGION: us-west-1
           AWS_ENDPOINT_URL: http://localhost:4566
           SQS_QUEUE_URL: http://localhost:4566/000000000000/producer-integration-test-queue
-        run: python -m unittest discover integration_tests/
+        run: python -m unittest discover tests_integration/
 
       - name: Stop LocalStack (Producer)
         if: always()
