@@ -180,7 +180,7 @@ resource "aws_s3_bucket" "bucket" {
 resource "aws_ssm_parameter" "auth_token" {
   name  = "/microservice1/token"
   type  = "SecureString"
-  value = "mP#9zT!kQs2@YpX7v$FgRt3Lw^eNb6hA"
+  value = var.producer_token
 }
 
 resource "aws_ecs_task_definition" "microservice1" {
