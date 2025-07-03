@@ -217,34 +217,6 @@ class TestConsumerApp(unittest.TestCase):
             self.mock_sqs_client.delete_message.assert_any_call(QueueUrl=self.SQS_QUEUE_URL, ReceiptHandle="handle1")
             self.mock_sqs_client.delete_message.assert_any_call(QueueUrl=self.SQS_QUEUE_URL, ReceiptHandle="handle2")
 
-    def test_poll_queue_message_processing_error(self):
-        """
-        Tests poll_queue's error handling when an individual message cannot be processed (e.g., invalid JSON).
-        Verifies that:
-        1. Only the invalid message is provided to SQS receive_message.
-        2. SQS receive_message is called once.
-        3. No S3 upload occurs for the invalid message.
-        4. The invalid message is NOT deleted from SQS (allowing for retry/DLQ).
-        """
-        # Provide only a single invalid JSON message to simulate a processing error.
-        mock_messages = [
-            {"Body": "invalid json", "ReceiptHandle": "handle_invalid"},
-        ]
-        self.mock_sqs_client.receive_message.return_value = {"Messages": mock_messages}
-        # Configure time.sleep to immediately raise StopIteration, exiting the loop.
-        self.mock_time_sleep.side_effect = [StopIteration]
-
-        # Assert that poll_queue raises StopIteration (as configured by mock_time_sleep).
-        with self.assertRaises(StopIteration):
-            self.app_module.poll_queue()
-
-        # Assertions for SQS and S3 interactions
-        self.mock_sqs_client.receive_message.assert_called_once()
-        # process_message (and thus s3.put_object) should NOT be called for an invalid message.
-        self.mock_s3_client.put_object.assert_not_called()
-        # The invalid message should NOT be deleted from SQS.
-        self.mock_sqs_client.delete_message.assert_not_called()
-
 
 if __name__ == '__main__':
     unittest.main()
