@@ -1,0 +1,51 @@
+name: Build and Push Microservices to Docker Hub
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+jobs:
+  build-producer:
+    name: Build and Push Producer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./producer
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t $DOCKERHUB_USERNAME/microservice1:latest .
+
+      - name: Push Docker image
+        run: docker push $DOCKERHUB_USERNAME/microservice1:latest
+
+  build-consumer:
+    name: Build and Push Consumer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./consumer
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        run: echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t $DOCKERHUB_USERNAME/microservice2:latest .
+
+      - name: Push Docker image
+        run: docker push $DOCKERHUB_USERNAME/microservice2:latest
