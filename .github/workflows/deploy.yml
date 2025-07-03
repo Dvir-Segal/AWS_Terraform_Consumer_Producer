@@ -17,8 +17,11 @@ env:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    name: Terraform Apply
+    name: Infrastructure Deployment
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Terraform
 
     steps:
       - name: Checkout source
