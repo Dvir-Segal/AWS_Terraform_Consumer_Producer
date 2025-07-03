@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./producer
+        working-directory: ./Producer
 
     steps:
       - name: Checkout code
@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./consumer
+        working-directory: ./Consumer
 
     steps:
       - name: Checkout code
