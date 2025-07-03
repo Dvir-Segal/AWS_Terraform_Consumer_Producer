@@ -8,6 +8,17 @@ resource "random_id" "bucket_suffix" {
   byte_length = 4
 }
 
+terraform {
+  backend "s3" {
+    bucket         = "PLACEHOLDER"
+    key            = "terraform.tfstate"
+    region         = "us-west-1"
+    dynamodb_table = "PLACEHOLDER"
+    encrypt        = true
+  }
+}
+
+
 # --- Networking ---
 resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
