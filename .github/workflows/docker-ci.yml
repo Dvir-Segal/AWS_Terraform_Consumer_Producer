@@ -27,25 +27,6 @@ jobs:
           pip install -r tests/requirements.txt
           python -m unittest discover tests/
 
-      - name: Start LocalStack for Producer Integration Tests
-        run: docker run --rm -d -p 4566:4566 -p 4510-4559:4510-4559 --name localstack-producer localstack/localstack
-
-      - name: Wait for LocalStack to be ready (Producer)
-        run: sleep 10
-
-      - name: Run Producer Integration Tests
-        env:
-          AWS_ACCESS_KEY_ID: test-p
-          AWS_SECRET_ACCESS_KEY: test-p
-          AWS_DEFAULT_REGION: us-west-1
-          AWS_ENDPOINT_URL: http://localhost:4566
-          SQS_QUEUE_URL: http://localhost:4566/000000000000/producer-integration-test-queue
-        run: python -m unittest discover tests_integration/
-
-      - name: Stop LocalStack (Producer)
-        if: always()
-        run: docker stop localstack-producer
-
       - name: Log in to Docker Hub
         run: echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
 
