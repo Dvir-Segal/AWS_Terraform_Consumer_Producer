@@ -86,7 +86,7 @@ class TestProducerApp(unittest.TestCase):
         """Tests the health check endpoint."""
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data.decode("utf-8"), "Microservice 1 OK")
+        self.assertEqual(response.data.decode("utf-8"), "Microservice1 OK")
 
     def test_receive_message_success(self):
         """Tests successful message reception and SQS dispatch."""
