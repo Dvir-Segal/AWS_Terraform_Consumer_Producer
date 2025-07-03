@@ -22,3 +22,9 @@ variable "producer_token" {
   sensitive   = true
 }
 
+variable "dockerhub_username" {
+  description = "DockerHub Username"
+  type        = string
+  sensitive   = true
+}
+
