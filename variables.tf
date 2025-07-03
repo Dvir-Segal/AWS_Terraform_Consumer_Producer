@@ -15,3 +15,10 @@ variable "region" {
   type        = string
   default     = "us-west-1"
 }
+
+variable "producer_token" {
+  description = "The secure token used by Microservice 1, stored in SSM"
+  type        = string
+  sensitive   = true
+}
+
