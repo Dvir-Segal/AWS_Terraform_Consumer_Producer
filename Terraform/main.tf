@@ -33,14 +33,14 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_subnet" "public_az1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.10.0/24"
-  availability_zone       = "us-west-1a"
+  availability_zone       = "${var.region}a"
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "public_az2" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.20.0/24"
-  availability_zone       = "us-west-1c"
+  availability_zone       = "${var.region}c"
   map_public_ip_on_launch = true
 }
 
@@ -218,7 +218,7 @@ resource "aws_ecs_task_definition" "microservice1" {
       },
       {
         name  = "AWS_REGION"
-        value = "us-west-1"
+        value = "${var.region}-1"
       },
       {
         name  = "TOKEN_PARAM"
@@ -274,7 +274,7 @@ resource "aws_ecs_task_definition" "microservice2" {
       },
       {
         name  = "AWS_REGION"
-        value = "us-west-1"
+        value = "${var.region}-1"
       }
     ]
   }])
