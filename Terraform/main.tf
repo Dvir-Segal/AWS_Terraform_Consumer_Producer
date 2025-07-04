@@ -685,7 +685,6 @@ resource "aws_ecs_service" "grafana_service" {
     aws_lb_listener.grafana_listener
   ]
 }
----
 
 # --- Outputs ---
 output "alb_dns_name" {
