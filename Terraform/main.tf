@@ -18,80 +18,22 @@ terraform {
   }
 }
 
-
-# --- Networking ---
-resource "aws_vpc" "main" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+module "vpc" {
+  source = "./modules/vpc"
+  region = var.region
 }
 
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.main.id
-}
 
-resource "aws_subnet" "public_az1" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.10.0/24"
-  availability_zone       = "${var.region}a"
-  map_public_ip_on_launch = true
-}
-
-resource "aws_subnet" "public_az2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = "10.0.20.0/24"
-  availability_zone       = "${var.region}c"
-  map_public_ip_on_launch = true
-}
-
-resource "aws_route_table" "rt" {
-  vpc_id = aws_vpc.main.id
-}
-
-resource "aws_route" "route" {
-  route_table_id         = aws_route_table.rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.igw.id
-}
-
-resource "aws_route_table_association" "rta_az1" {
-  subnet_id      = aws_subnet.public_az1.id
-  route_table_id = aws_route_table.rt.id
-}
-
-resource "aws_route_table_association" "rta_az2" {
-  subnet_id      = aws_subnet.public_az2.id
-  route_table_id = aws_route_table.rt.id
-}
-
-# --- Security Group ---
-resource "aws_security_group" "alb_sg" {
-  name        = "alb-sg"
-  vpc_id      = aws_vpc.main.id
-  description = "Allow HTTP to ALB"
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
-# --- ALB ---
 resource "aws_lb" "alb" {
   name               = "microservice1-alb"
   internal           = false
   load_balancer_type = "application"
-  subnets            = [aws_subnet.public_az1.id, aws_subnet.public_az2.id]
-  security_groups    = [aws_security_group.alb_sg.id]
+  subnets            = module.vpc.public_subnet_ids
+  security_groups    = [module.vpc.alb_sg_id]
+
+  tags = {
+    Name = "microservice1-alb"
+  }
 }
 
 resource "aws_lb_target_group" "tg" {
@@ -99,7 +41,7 @@ resource "aws_lb_target_group" "tg" {
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = module.vpc.vpc_id
 
   health_check {
     path                = "/"
@@ -108,6 +50,10 @@ resource "aws_lb_target_group" "tg" {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     matcher             = "200-399"
+  }
+
+  tags = {
+    Name = "microservice1-tg"
   }
 }
 
@@ -119,6 +65,10 @@ resource "aws_lb_listener" "listener" {
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.tg.arn
+  }
+
+  tags = {
+    Name = "microservice1-listener"
   }
 }
 
@@ -136,6 +86,10 @@ resource "aws_iam_role" "ecs_task_role" {
       Action = "sts:AssumeRole"
     }]
   })
+
+  tags = {
+    Name = "ecsTaskRole"
+  }
 }
 
 resource "aws_iam_role_policy" "ecs_policy" {
@@ -174,24 +128,40 @@ resource "aws_iam_role_policy" "ecs_policy" {
   })
 }
 
-# --- ECS ---
+# --- ECS Cluster ---
 resource "aws_ecs_cluster" "cluster" {
   name = "microservices-cluster"
+
+  tags = {
+    Name = "microservices-cluster"
+  }
 }
 
 resource "aws_sqs_queue" "queue" {
   name = "microservice-queue"
+
+  tags = {
+    Name = "microservice-queue"
+  }
 }
 
 resource "aws_s3_bucket" "bucket" {
   bucket        = "microservice-data-${random_id.bucket_suffix.hex}"
   force_destroy = true
+
+  tags = {
+    Name = "microservice-data-bucket"
+  }
 }
 
 resource "aws_ssm_parameter" "auth_token" {
   name  = "/microservice1/token"
   type  = "SecureString"
   value = var.producer_token
+
+  tags = {
+    Name = "microservice1-auth-token"
+  }
 }
 
 resource "aws_ecs_task_definition" "microservice1" {
@@ -204,7 +174,7 @@ resource "aws_ecs_task_definition" "microservice1" {
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([{
-    name  = "microservice1"
+    name = "microservice1"
     image = "${var.dockerhub_username}/microservice1:placeholder"
     portMappings = [{
       containerPort = 80
@@ -218,7 +188,7 @@ resource "aws_ecs_task_definition" "microservice1" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}"
+        value = var.region
       },
       {
         name  = "TOKEN_PARAM"
@@ -226,6 +196,10 @@ resource "aws_ecs_task_definition" "microservice1" {
       }
     ]
   }])
+
+  tags = {
+    Name = "microservice1-task"
+  }
 }
 
 resource "aws_ecs_service" "microservice1" {
@@ -236,9 +210,9 @@ resource "aws_ecs_service" "microservice1" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.public_az1.id, aws_subnet.public_az2.id]
+    subnets          = module.vpc.public_subnet_ids
     assign_public_ip = true
-    security_groups  = [aws_security_group.alb_sg.id]
+    security_groups  = [module.vpc.alb_sg_id]
   }
 
   load_balancer {
@@ -248,6 +222,10 @@ resource "aws_ecs_service" "microservice1" {
   }
 
   depends_on = [aws_lb_listener.listener]
+
+  tags = {
+    Name = "microservice1-service"
+  }
 }
 
 # Microservice 2 Task Definition
@@ -261,7 +239,7 @@ resource "aws_ecs_task_definition" "microservice2" {
   task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   container_definitions = jsonencode([{
-    name  = "microservice2"
+    name = "microservice2"
     image = "${var.dockerhub_username}/microservice2:placeholder"
     environment = [
       {
@@ -274,10 +252,22 @@ resource "aws_ecs_task_definition" "microservice2" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}"
+        value = var.region
       }
     ]
+    logConfiguration = {
+      logDriver = "awslogs",
+      options = {
+        "awslogs-group"         = "/ecs/microservice2",
+        "awslogs-region"        = var.region,
+        "awslogs-stream-prefix" = "microservice2"
+      }
+    }
   }])
+
+  tags = {
+    Name = "microservice2-task"
+  }
 }
 
 # Microservice 2 ECS Service (runs continuously)
@@ -289,9 +279,13 @@ resource "aws_ecs_service" "microservice2" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.public_az1.id, aws_subnet.public_az2.id]
+    subnets          = module.vpc.public_subnet_ids
     assign_public_ip = true
-    security_groups  = [aws_security_group.alb_sg.id]
+    security_groups  = [module.vpc.alb_sg_id]
+  }
+
+  tags = {
+    Name = "microservice2-service"
   }
 }
 
