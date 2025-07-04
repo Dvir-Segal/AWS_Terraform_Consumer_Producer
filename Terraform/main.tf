@@ -218,7 +218,7 @@ resource "aws_ecs_task_definition" "microservice1" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}-1"
+        value = "${var.region}"
       },
       {
         name  = "TOKEN_PARAM"
@@ -274,7 +274,7 @@ resource "aws_ecs_task_definition" "microservice2" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}-1"
+        value = "${var.region}"
       }
     ]
   }])
