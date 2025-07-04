@@ -255,14 +255,6 @@ resource "aws_ecs_task_definition" "microservice2" {
         value = var.region
       }
     ]
-    logConfiguration = {
-      logDriver = "awslogs",
-      options = {
-        "awslogs-group"         = "/ecs/microservice2",
-        "awslogs-region"        = var.region,
-        "awslogs-stream-prefix" = "microservice2"
-      }
-    }
   }])
 
   tags = {
