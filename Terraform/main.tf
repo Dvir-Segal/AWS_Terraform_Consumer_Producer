@@ -274,7 +274,6 @@ resource "aws_ecs_service" "microservice1" {
   # ADD THIS BLOCK for Cloud Map registration
   service_registries {
     registry_arn = aws_service_discovery_service.producer_cloudmap_service.arn
-    port         = 80 # Producer container's HTTP port
   }
 }
 
