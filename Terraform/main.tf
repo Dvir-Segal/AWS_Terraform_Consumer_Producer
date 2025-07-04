@@ -218,7 +218,7 @@ resource "aws_ecs_task_definition" "microservice1" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}-1"
+        value = "${var.region}"
       },
       {
         name  = "TOKEN_PARAM"
@@ -274,7 +274,7 @@ resource "aws_ecs_task_definition" "microservice2" {
       },
       {
         name  = "AWS_REGION"
-        value = "${var.region}-1"
+        value = "${var.region}"
       }
     ]
   }])
@@ -310,4 +310,3 @@ output "s3_bucket_name" {
   description = "S3 Bucket"
   value       = aws_s3_bucket.bucket.bucket
 }
-

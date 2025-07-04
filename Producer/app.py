@@ -14,6 +14,31 @@ sqs = boto3.client("sqs", region_name=os.getenv("AWS_REGION", "us-west-1"))
 AUTH_TOKEN = ssm.get_parameter(Name="/microservice1/token", WithDecryption=True)["Parameter"]["Value"]
 SQS_QUEUE_URL = os.getenv("SQS_QUEUE_URL")
 
+# --- START OF PROMETHEUS METRICS DEFINITIONS ---
+REQUEST_COUNT = Counter(
+    'http_requests_total', 'Total HTTP Requests', ['method', 'endpoint']
+)
+REQUEST_LATENCY = Histogram(
+    'http_request_duration_seconds', 'HTTP Request Latency', ['method', 'endpoint']
+)
+SQS_MESSAGES_SENT = Counter(
+    'sqs_messages_sent_total', 'Total messages sent to SQS'
+)
+UNAUTHORIZED_ACCESS_COUNT = Counter(
+    'unauthorized_access_total', 'Total unauthorized access attempts'
+)
+HEALTH_STATUS = Gauge('app_health_status', 'Application Health Status (1=OK, 0=Degraded)')
+# --- END OF PROMETHEUS METRICS DEFINITIONS ---
+
+# --- NEW ENDPOINT FOR PROMETHEUS SCRAPING ---
+@app.route("/metrics")
+def metrics():
+    """
+    Exposes Prometheus metrics for scraping.
+    """
+    return generate_latest(), 200, {'Content-Type': 'text/plain; version=0.0.4; charset=utf-8'}
+# --- END NEW ENDPOINT ---
+
 @app.route("/message", methods=["POST"])
 def receive_message():
     try:
