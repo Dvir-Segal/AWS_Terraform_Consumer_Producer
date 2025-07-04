@@ -18,10 +18,6 @@ This project deploys a **Producer-Consumer microservices architecture** on **AWS
 
 * **Terraform CLI** (v1.12.2)
 
-* **Docker Desktop**
-
-* **Python 3**
-
 * **GitHub** & **Docker Hub** accounts
 
 ## ⚙️ Setup & Deployment
