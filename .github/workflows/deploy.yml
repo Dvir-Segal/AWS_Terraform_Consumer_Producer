@@ -50,24 +50,14 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE_NAME }}" \
             -backend-config="encrypt=true"
 
-      # --- STEP TO FORCE UNLOCK ---
-      - name: Attempt to Force Unlock Terraform State
-        # This step is added to try and clear a stale lock before proceeding.
-        # It's set to continue on error so the main plan/destroy can still attempt to run.
-        # REPLACE 'f7d9ab11-4a1c-e2b7-922d-a2d0d41c9719d' with the *actual* lock ID from any future error,
-        # if it changes.
-        run: |
-          echo "Attempting to force unlock Terraform state..."
-          terraform force-unlock -force f7d9ab11-4a1c-e2b7-922d-a20d41c9719df7d9ab11-4a1c-e2b7-922d-a20d41c9719d || true
-      # --- END FORCE UNLOCK STEP ---
-
-      # - name: Terraform Plan
-      #   run: terraform plan
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve
+      - name: Terraform Plan
+        run: terraform plan
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
 
       # - name: Terraform plan Destroy
       #   run: terraform plan -destroy
 
-      - name: Terraform Destroy
-        run: terraform destroy --auto-approve
+      # - name: Terraform Destroy
+      #   run: terraform destroy --auto-approve
