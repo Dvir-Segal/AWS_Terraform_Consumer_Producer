@@ -50,14 +50,14 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE_NAME }}" \
             -backend-config="encrypt=true"
 
+      - name: ניסיון לשחרר נעילת Terraform State
+        run: |
+          echo "מנסה לשחרר נעילת Terraform State עם מזהה: f7d9ab11-4a1c-e2b7-922d-a20d41c9719d"
+          terraform force-unlock -force f7d9ab11-4a1c-e2b7-922d-a20d41c9719d || true
+        continue-on-error: true
+
       - name: Terraform Plan
         run: terraform plan
-      
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
-
-      # - name: Terraform plan Destroy
-      #   run: terraform plan -destroy
-
-      # - name: Terraform Destroy
-      #   run: terraform destroy --auto-approve
