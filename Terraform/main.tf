@@ -334,6 +334,9 @@ resource "aws_service_discovery_http_namespace" "microservices_namespace" {
 resource "aws_service_discovery_service" "producer_cloudmap_service" {
   name        = "producer-service"
   description = "Cloud Map service for the Producer microservice"
+  http_config {
+    namespace_id = aws_service_discovery_http_namespace.microservices_namespace.id
+  }
   health_check_custom_config {
     failure_threshold = 1
   }
