@@ -81,7 +81,7 @@ This triggers the **CI/CD pipeline** (`build-and-push.yaml` then `deploy.yaml`).
 
 This project uses two GitHub Actions workflows located in the `.github/workflows/` directory:
 
-### 1. `build-and-push.yaml` (Continuous Integration Workflow)
+### 1. `docker-ci.yaml` (Continuous Integration Workflow)
 
 This workflow **builds Docker images for both microservices and pushes them to Docker Hub, tagged with the Git commit SHA.**
 
