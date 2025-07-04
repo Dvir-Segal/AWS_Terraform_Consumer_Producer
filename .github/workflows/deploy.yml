@@ -58,7 +58,7 @@ jobs:
         # if it changes.
         run: |
           echo "Attempting to force unlock Terraform state..."
-          terraform force-unlock -force f7d9ab11-4a1c-e2b7-922d-a2d0d41c9719d || true
+          terraform force-unlock -force f7d9ab11-4a1c-e2b7-922d-a20d41c9719df7d9ab11-4a1c-e2b7-922d-a20d41c9719d || true
       # --- END FORCE UNLOCK STEP ---
 
       # - name: Terraform Plan
