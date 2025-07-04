@@ -41,7 +41,7 @@ jobs:
           sed -i "s|\(image = \\\".*/microservice2:\).*\\\"|\1${SHORT_SHA}\\\"|" main.tf
 
 
-- name: Terraform Init with backend config
+      - name: Terraform Init with backend config
         run: |
           terraform init \
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET_NAME }}" \
@@ -66,8 +66,8 @@ jobs:
       # - name: Terraform Apply
       #   run: terraform apply -auto-approve
 
-      - name: Terraform plan Destroy
-        run: terraform plan -destroy
+      # - name: Terraform plan Destroy
+      #   run: terraform plan -destroy
 
       - name: Terraform Destroy
         run: terraform destroy --auto-approve
