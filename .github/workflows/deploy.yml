@@ -50,13 +50,13 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE_NAME }}" \
             -backend-config="encrypt=true"
 
-      - name: Terraform Plan
-        run: terraform plan
+      # - name: Terraform Plan
+      #   run: terraform plan
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve
 
-      # - name: Terraform des
-      #   run: terraform destroy -auto-approve
+      - name: Terraform des
+        run: terraform destroy -auto-approve
 
         
