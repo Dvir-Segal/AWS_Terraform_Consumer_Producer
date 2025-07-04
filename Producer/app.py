@@ -3,6 +3,7 @@ import boto3
 import os
 import json
 from datetime import datetime
+from prometheus_client import generate_latest, Counter, Histogram, Gauge
 
 app = Flask(__name__)
 
