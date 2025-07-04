@@ -323,7 +323,6 @@ resource "aws_ecs_service" "microservice2" {
   }
 }
 
----
 # --- BEGIN MONITORING INFRASTRUCTURE (Producer, Prometheus, Grafana) ---
 
 # --- AWS Cloud Map for Service Discovery ---
