@@ -327,21 +327,13 @@ resource "aws_ecs_service" "microservice2" {
 
 # --- AWS Cloud Map for Service Discovery ---
 resource "aws_service_discovery_http_namespace" "microservices_namespace" {
-  name        = "my-ecs-microservices" # Ensure this matches your prometheus.yml
+  name        = "my-ecs-microservices"
   description = "HTTP Namespace for Microservices in ECS for Monitoring"
 }
 
 resource "aws_service_discovery_service" "producer_cloudmap_service" {
-  name        = "producer-service" # This name is used in prometheus.yml
+  name        = "producer-service"
   description = "Cloud Map service for the Producer microservice"
-  dns_config {
-    namespace_id = aws_service_discovery_http_namespace.microservices_namespace.id
-    dns_records {
-      ttl  = 10
-      type = "A"
-    }
-    routing_policy = "MULTIVALUE"
-  }
   health_check_custom_config {
     failure_threshold = 1
   }
@@ -469,7 +461,8 @@ resource "aws_ecs_task_definition" "prometheus_task" {
     name = "prometheus-data"
     efs_volume_configuration {
       file_system_id = aws_efs_file_system.monitoring_efs.id
-      root_directory = "/prometheus"
+      # שנה את השורה הזו מ-"/prometheus" ל-"/"
+      root_directory = "/"
       transit_encryption = "ENABLED"
       authorization_config {
         access_point_id = aws_efs_access_point.prometheus_ap.id
@@ -479,7 +472,7 @@ resource "aws_ecs_task_definition" "prometheus_task" {
   }
   container_definitions = jsonencode([{
     name        = "prometheus",
-    image       = "${var.dockerhub_username}/prometheus:placeholder",
+    image       = "${var.dockerhub_username}/prometheus:latest", # אימג' מותאם אישית עם prometheus.yml
     cpu         = 512,
     memory      = 1024,
     portMappings = [{ containerPort = 9090, hostPort = 9090, protocol = "tcp" }],
@@ -590,7 +583,7 @@ resource "aws_ecs_task_definition" "grafana_task" {
     name = "grafana-data"
     efs_volume_configuration {
       file_system_id = aws_efs_file_system.monitoring_efs.id
-      root_directory = "/grafana"
+      root_directory = "/"
       transit_encryption = "ENABLED"
       authorization_config {
         access_point_id = aws_efs_access_point.grafana_ap.id
@@ -600,14 +593,14 @@ resource "aws_ecs_task_definition" "grafana_task" {
   }
   container_definitions = jsonencode([{
     name        = "grafana",
-    image       = "grafana/grafana:latest",
+    image       = "grafana/grafana:latest", # יכול להיות מוחלף לאימג' המותאם אישית שלך אם משתמשים ב-provisioning
     cpu         = 256,
     memory      = 512,
     portMappings = [{ containerPort = 3000, hostPort = 3000, protocol = "tcp" }],
     mountPoints = [{ sourceVolume = "grafana-data", containerPath = "/var/lib/grafana", readOnly = false }],
     environment = [
       { name = "GF_PATHS_PROVISIONING", value = "/etc/grafana/provisioning" },
-      { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "true" }, # NOT for production, for simplicity
+      { name = "GF_AUTH_ANONYMOUS_ENABLED", value = "true" }, # לא מיועד לפרודקשן, לצורך פשטות
       { name = "GF_AUTH_ANONYMOUS_ORG_ROLE", value = "Viewer" },
       { name = "GF_SERVER_ROOT_URL", value = "http://localhost:3000" }
     ],
