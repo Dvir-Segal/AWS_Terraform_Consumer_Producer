@@ -50,11 +50,16 @@ jobs:
             -backend-config="dynamodb_table=${{ secrets.TF_LOCK_TABLE_NAME }}" \
             -backend-config="encrypt=true"
 
-      # - name: Terraform Plan
-      #   run: terraform plan
+      - name: Terraform Plan
+        run: terraform plan
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+
+      - name: Wait before Destroy
+        run: |
+          echo "Sleeping for 60 seconds before starting Terraform Destroy..."
+          sleep 60 # Sleep for 60 seconds
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve
